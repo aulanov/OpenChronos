@@ -70,6 +70,15 @@
 // *************************************************************************************************
 // Defines section
 
+#if defined(CONFIG_ALTITUDE_UNIT_FEET) && defined(CONFIG_ALTITUDE_UNIT_METERS)
+#error "You cannot define both CONFIG_ALTITUDE_UNIT_FEET and CONFIG_ALTITUDE_UNIT_METERS"
+#endif
+#if !defined(CONFIG_ALTITUDE_UNIT_FEET) && defined(CONFIG_METRIC_ONLY)
+#define CONFIG_ALTITUDE_UNIT_METERS
+#endif
+#if !defined(CONFIG_ALTITUDE_UNIT_FEET) && !defined(CONFIG_ALTITUDE_UNIT_METERS)
+#define CONFIG_ALTITUDE_UNIT_SETTABLE
+#endif
 
 // *************************************************************************************************
 // Global Variable section
@@ -130,7 +139,7 @@ void reset_altitude_measurement(void)
 	}
 }
 
-#ifndef CONFIG_METRIC_ONLY
+#if defined(CONFIG_ALTITUDE_UNIT_FEET) || defined(CONFIG_ALTITUDE_UNIT_SETTABLE)
 // *************************************************************************************************
 // @fn          conv_m_to_ft
 // @brief       Convert meters to feet
@@ -312,18 +321,11 @@ void mx_altitude(u8 line)
 #endif
 
 	// Set lower and upper limits for offset correction
-#ifdef CONFIG_METRIC_ONLY
-	display_symbol(LCD_UNIT_L1_M, SEG_ON);
-
-	// Convert global variable to local variable
-	altitude  = sAlt.altitude; 
-
-	// Limits for set_value function
-	limit_low = -100;
-	limit_high = 9000;
-#else
+#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
 	if (sys.flag.use_metric_units)
 	{
+#endif
+#if defined(CONFIG_ALTITUDE_UNIT_SETTABLE) | defined(CONFIG_ALTITUDE_UNIT_METERS)
 		// Display "m" symbol
 		display_symbol(LCD_UNIT_L1_M, SEG_ON);
 
@@ -333,9 +335,13 @@ void mx_altitude(u8 line)
 		// Limits for set_value function
 		limit_low = -100;
 		limit_high = 9000;
+#endif
+#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
 	}
 	else // English units
 	{
+#endif
+#if defined(CONFIG_ALTITUDE_UNIT_SETTABLE) | defined(CONFIG_ALTITUDE_UNIT_FEET)
 		// Display "ft" symbol
 		display_symbol(LCD_UNIT_L1_FT, SEG_ON);
 		
@@ -352,6 +358,8 @@ void mx_altitude(u8 line)
 #else
 		limit_high = 9999;
 #endif
+#endif
+#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
 	}
 #endif
 	// Loop values until all are set or user breaks	set
@@ -364,8 +372,15 @@ void mx_altitude(u8 line)
 		if (button.flag.star) 
 		{
 			// When using English units, convert ft back to m before updating pressure table
-#ifndef CONFIG_METRIC_ONLY
-			if (!sys.flag.use_metric_units) altitude = convert_ft_to_m((s16)altitude);
+#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
+			if (!sys.flag.use_metric_units)
+			{
+#endif
+#if defined(CONFIG_ALTITUDE_UNIT_SETTABLE) | defined(CONFIG_ALTITUDE_UNIT_FEET)
+				altitude = convert_ft_to_m((s16)altitude);
+#endif
+#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
+			}
 #endif
 
 			// Update pressure table
@@ -402,7 +417,7 @@ void mx_altitude(u8 line)
 void display_altitude(u8 line, u8 update)
 {
 	u8 * str;
-#ifndef CONFIG_METRIC_ONLY
+#if defined(CONFIG_ALTITUDE_UNIT_SETTABLE) | defined(CONFIG_ALTITUDE_UNIT_FEET)
 	s16 ft;
 #endif
 	
@@ -417,18 +432,24 @@ void display_altitude(u8 line, u8 update)
 #ifdef CONFIG_ALTI_ACCUMULATOR
 		display_chars(LCD_SEG_L1_3_0, (u8*)"ALT ", SEG_ON);
 #endif
-#ifdef CONFIG_METRIC_ONLY
-			display_symbol(LCD_UNIT_L1_M, SEG_ON);
-#else		
+#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE	
 		if (sys.flag.use_metric_units)
 		{
+#endif
+#if defined(CONFIG_ALTITUDE_UNIT_SETTABLE) | defined(CONFIG_ALTITUDE_UNIT_METERS)
 			// Display "m" symbol
 			display_symbol(LCD_UNIT_L1_M, SEG_ON);
+#endif
+#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
 		}
 		else
 		{
+#endif
+#if defined(CONFIG_ALTITUDE_UNIT_SETTABLE) | defined(CONFIG_ALTITUDE_UNIT_FEET)
 			// Display "ft" symbol
 			display_symbol(LCD_UNIT_L1_FT, SEG_ON);
+#endif
+#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
 		}
 #endif		
 		// Display altitude
@@ -439,10 +460,11 @@ void display_altitude(u8 line, u8 update)
 		// Update display only while measurement is active
 		if (sAlt.timeout > 0)
 		{
-#ifndef CONFIG_METRIC_ONLY
+#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
 			if (sys.flag.use_metric_units)
 			{
 #endif
+#if defined(CONFIG_ALTITUDE_UNIT_SETTABLE) | defined(CONFIG_ALTITUDE_UNIT_METERS)
 				// Display altitude in xxxx m format, allow 3 leading blank digits
 				if (sAlt.altitude >= 0)
 				{
@@ -464,10 +486,13 @@ void display_altitude(u8 line, u8 update)
 					display_symbol(LCD_SYMB_ARROW_UP, SEG_OFF);
 					display_symbol(LCD_SYMB_ARROW_DOWN, SEG_ON);
 				}
-#ifndef CONFIG_METRIC_ONLY
+#endif
+#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
 			}
 			else
 			{
+#endif
+#if defined(CONFIG_ALTITUDE_UNIT_SETTABLE) | defined(CONFIG_ALTITUDE_UNIT_FEET)
 				// Convert from meters to feet
 				ft = convert_m_to_ft(sAlt.altitude);
 #ifndef CONFIG_ALTI_ACCUMULATOR
@@ -495,6 +520,8 @@ void display_altitude(u8 line, u8 update)
 					display_symbol(LCD_SYMB_ARROW_UP, SEG_OFF);
 					display_symbol(LCD_SYMB_ARROW_DOWN, SEG_ON);
 				}				
+#endif
+#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
 			}
 #endif
 #ifdef CONFIG_ALTI_ACCUMULATOR
