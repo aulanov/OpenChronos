@@ -303,11 +303,10 @@ void display_date(line_t line, update_t update)
 				str = _itoa(sDate.day, 2, 1);
 				display_chars(switch_seg(line, LCD_SEG_L1_1_0, LCD_SEG_L2_1_0), str, SEG_ON);
 
-				//pfs BEGIN replace year display with day of week
-				//pfs algorith from http://klausler.com/new-dayofweek.html
-				#define BASE_YEAR 2001 // not a leap year, so no need to add 1
-				u8 skew;
-				skew = (sDate.year - BASE_YEAR)+(sDate.year - BASE_YEAR)/4; // compute number of leap years since BASE_YEAR
+				// See http://en.wikipedia.org/wiki/Weekday_determination
+				#define BASE_YEAR 2000
+				u8 skew = 6;
+				skew += (sDate.year - BASE_YEAR)+(sDate.year - BASE_YEAR)/4; // compute number of leap years since BASE_YEAR
 				if ((29 == get_numberOfDays(2, sDate.year)) && (sDate.month < 3))
 				  skew--; // if this is a leap year but before February 29
 				skew = (skew + sDate.day); // add day of current month
@@ -351,25 +350,24 @@ void display_date(line_t line, update_t update)
 				// Convert day to string
 				display_symbol(switch_seg(line, LCD_SEG_L1_DP1, LCD_SEG_L2_DP), SEG_ON);
 				// display date
-#ifdef CONFIG_METRIC_ONLY       // changed from ifndef
-				if (sys.flag.use_metric_units) { //removed ! from (!sys.flag....
+#ifdef CONFIG_METRIC_ONLY
+				if (sys.flag.use_metric_units) {
 					str = _itoa(sDate.day, 2, 0);
 					display_chars(switch_seg(line, LCD_SEG_L1_1_0, LCD_SEG_L2_1_0), str, SEG_ON);
 
 					// Convert month to string
 					str = _itoa(sDate.month, 2, 1);
 					display_chars(switch_seg(line, LCD_SEG_L1_3_2, LCD_SEG_L2_3_2), str, SEG_ON);
-				} else {
+				} else
 #else
-				if (1) {
-//#endif //at wrong place
+				{
 					str = _itoa(sDate.day, 2, 0);
 					display_chars(switch_seg(line, LCD_SEG_L1_3_2, LCD_SEG_L2_3_2), str, SEG_ON);
 					
 					str = _itoa(sDate.month, 2, 0);
 					display_chars(switch_seg(line, LCD_SEG_L1_1_0, LCD_SEG_L2_1_0), str, SEG_ON);
-#endif //placement fix
 				}
+#endif
 				break;
 			case 2: //YYYY
 				// Convert year to string
