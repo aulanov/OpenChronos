@@ -59,10 +59,9 @@ s16 conv_altitude_to_fraction(s16 hh)
 //				Implemented straight from VTI reference code.
 // @param       s16		href	Reference height
 //				u32		p_meas	Pressure (Pa)
-//				u16		t_meas	Temperature (10*°K)
 // @return     	none
 // *************************************************************************************************
-void update_pressure_table(s16 href, u32 p_meas, u16 t_meas)
+void update_pressure_table(s16 href, u32 p_meas)
 {
 	// Note: a user-provided sea-level reference pressure in mbar as used by pilots
 	// would be straightforward: href = 0; p_meas = (s32)mbar*100;
@@ -90,11 +89,10 @@ void update_pressure_table(s16 href, u32 p_meas, u16 t_meas)
 //				stored reference pressure at sea level and previous altitude estimate.
 //				Temperature info is ignored.
 // @param       u32		p_meas	Pressure (Pa)
-// @param		u16		t_meas	Temperature (10*°K) Ignored !!!
 // @return      Estimated altitude in user-selected unit (m or ft)
 //              (internally filtered, slightly sluggish).
 // *************************************************************************************************
-s16 conv_pa_to_altitude(u32 p_meas, u16 t_meas)
+s16 conv_pa_to_altitude(u32 p_meas)
 {
 	/*
 	Assumption: fixed, linear T(h)

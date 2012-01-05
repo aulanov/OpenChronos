@@ -134,7 +134,7 @@ void reset_altitude_measurement(void)
 		if (sAlt.altitude_offset != 0)
 		{
 			sAlt.altitude += sAlt.altitude_offset;
-			update_pressure_table(sAlt.altitude, sAlt.pressure, sAlt.temperature);
+			update_pressure_table(sAlt.altitude, sAlt.pressure);
 		}
 	}
 }
@@ -222,9 +222,6 @@ void do_altitude_measurement(u8 filter)
 
 	// If sensor is not ready, skip data read	
 	if ((PS_INT_IN & PS_INT_PIN) == 0) return;
-		
-	// Get temperature (format is *10?K) from sensor
-	sAlt.temperature = ps_get_temp();
 
 	// Get pressure (format is 1Pa) from sensor
 	pressure = ps_get_pa();	
@@ -246,12 +243,8 @@ void do_altitude_measurement(u8 filter)
 		sAlt.pressure = pressure;
 	}
 
-	// Convert pressure (Pa) and temperature (?K) to altitude (m).
-#ifdef FIXEDPOINT
-	sAlt.altitude = conv_pa_to_altitude(sAlt.pressure, sAlt.temperature);
-#else
-    sAlt.altitude = conv_pa_to_meter(sAlt.pressure, sAlt.temperature);
-#endif
+	// Convert pressure (Pa) to altitude (m or ft).
+	sAlt.altitude = conv_pa_to_altitude(sAlt.pressure);
 
 #ifdef CONFIG_VARIO
    // Stash a copy to the vario after filtering. If doing so before, there
@@ -343,7 +336,7 @@ void mx_altitude(u8 line)
 		if (button.flag.star) 
 		{
 			// Update pressure table
-			update_pressure_table((s16)altitude, sAlt.pressure, sAlt.temperature);
+			update_pressure_table((s16)altitude, sAlt.pressure);
 			
 			// Set display update flag
 			display.flag.line1_full_update = 1;
