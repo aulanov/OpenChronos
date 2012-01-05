@@ -204,7 +204,6 @@ int main(void)
  	}	
 }
 
-
 // *************************************************************************************************
 // @fn          init_application
 // @brief       Initialize the microcontroller.

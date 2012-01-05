@@ -210,9 +210,7 @@
 	#define _CPU_EDGE_HIGH_LOW_1_ TRUE
 	//#define _CPU_64BIT_INT_       long long
 
-//  #endif
-
-
+#elif defined(HOST_TESTS)
 #else
   #error "Unknown Compiler, the file bm.h has to be expanded !"
 #endif

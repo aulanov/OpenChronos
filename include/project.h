@@ -55,27 +55,17 @@
 
 // *************************************************************************************************
 // Include section
-//pfs
-#include <intrinsics.h>
 #include "../bluerobin/bm.h"
 
+#ifndef HOST_TESTS
+#include <intrinsics.h>
 #include <cc430x613x.h>
-//pfs #include <bm.h>
+#endif
 
 #include "config.h"
 
 // *************************************************************************************************
 // Defines section
-
-// moved to config.h
-// Comment this to not use the LCD charge pump
-//#define USE_LCD_CHARGE_PUMP
-
-// Comment this define to build the application without watchdog support
-//#define USE_WATCHDOG
-
-// end of move
-
 
 // Use/not use filter when measuring physical values
 #define FILTER_OFF						(0u)

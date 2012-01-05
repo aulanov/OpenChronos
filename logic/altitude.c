@@ -47,6 +47,7 @@
 
 // driver
 #include "altitude.h"
+#include "altitude_math.h"
 //#ifdef CONFIG_ALTI_ACCUMULATOR
 //#include "alt_accu.h"
 //#endif
@@ -116,9 +117,6 @@ void reset_altitude_measurement(void)
 	// Pressure sensor ok?
 	if (ps_ok)
 	{
-		// Initialise pressure table
-		init_pressure_table();
-		
 		// Do single conversion
 		start_altitude_measurement();
 		stop_altitude_measurement();	

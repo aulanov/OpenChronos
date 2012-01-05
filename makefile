@@ -5,6 +5,8 @@ CC  = msp430-gcc
 LD  = msp430-ld
 PYTHON := $(shell which python2 || which python)
 
+HOST_CC = gcc
+
 PROJ_DIR	=.
 BUILD_DIR = build
 CFLAGS_PRODUCTION = -Os -Wall#-Wl,--gc-sections # -ffunction-sections # -fdata-sections  -fno-inline-functions# -O optimizes
@@ -16,11 +18,11 @@ CFLAGS_DEBUG= -g -Os # -g enables debugging symbol table, -O0 for NO optimizatio
 CC_CMACH	= -mmcu=cc430f6137
 CC_DMACH	= -D__MSP430_6137__ -DMRFI_CC430 -D__CC430F6137__ #-DCC__MSPGCC didn't need mspgcc defines __GNUC__
 CC_DOPT		= -DELIMINATE_BLUEROBIN
-CC_INCLUDE = -I$(PROJ_DIR)/ -I$(PROJ_DIR)/include/ -I$(PROJ_DIR)/gcc/ -I$(PROJ_DIR)/driver/ -I$(PROJ_DIR)/logic/ -I$(PROJ_DIR)/bluerobin/ -I$(PROJ_DIR)/simpliciti/ -I$(PROJ_DIR)/simpliciti/Components/bsp -I$(PROJ_DIR)/simpliciti/Components/bsp/drivers -I$(PROJ_DIR)/simpliciti/Components/bsp/boards/CC430EM -I$(PROJ_DIR)/simpliciti/Components/mrfi -I$(PROJ_DIR)/simpliciti/Components/nwk -I$(PROJ_DIR)/simpliciti/Components/nwk_applications
+CC_INCLUDE = -I$(PROJ_DIR)/ -I$(PROJ_DIR)/include/ -I$(PROJ_DIR)/driver/ -I$(PROJ_DIR)/logic/ -I$(PROJ_DIR)/bluerobin/ -I$(PROJ_DIR)/simpliciti/ -I$(PROJ_DIR)/simpliciti/Components/bsp -I$(PROJ_DIR)/simpliciti/Components/bsp/drivers -I$(PROJ_DIR)/simpliciti/Components/bsp/boards/CC430EM -I$(PROJ_DIR)/simpliciti/Components/mrfi -I$(PROJ_DIR)/simpliciti/Components/nwk -I$(PROJ_DIR)/simpliciti/Components/nwk_applications
 
 CC_COPT		=  $(CC_CMACH) $(CC_DMACH) $(CC_DOPT)  $(CC_INCLUDE) 
 
-LOGIC_SOURCE = logic/acceleration.c logic/alarm.c logic/altitude.c logic/battery.c  logic/clock.c logic/date.c logic/menu.c logic/rfbsl.c logic/rfsimpliciti.c logic/stopwatch.c logic/temperature.c logic/test.c logic/user.c logic/phase_clock.c logic/eggtimer.c logic/prout.c logic/vario.c logic/sidereal.c logic/strength.c \
+LOGIC_SOURCE = logic/acceleration.c logic/alarm.c logic/altitude.c logic/altitude_math.c logic/battery.c  logic/clock.c logic/date.c logic/menu.c logic/rfbsl.c logic/rfsimpliciti.c logic/stopwatch.c logic/temperature.c logic/test.c logic/user.c logic/phase_clock.c logic/eggtimer.c logic/prout.c logic/vario.c logic/sidereal.c logic/strength.c \
 				logic/sequence.c logic/gps.c logic/dst.c logic/otp.c
 
 LOGIC_O = $(addsuffix .o,$(basename $(LOGIC_SOURCE)))
@@ -35,9 +37,9 @@ SIMPLICICTI_SOURCE = $(SIMPLICICTI_SOURCE_ODD) simpliciti/Components/bsp/bsp.c s
 
 SIMPLICICTI_O = $(addsuffix .o,$(basename $(SIMPLICICTI_SOURCE)))
 
-MAIN_SOURCE = ezchronos.c  gcc/intrinsics.c 
+MAIN_SOURCE = ezchronos.c
 
-MAIN_O = ezchronos.o gcc/intrinsics.o 
+MAIN_O = ezchronos.o
 
 ALL_O = $(LOGIC_O) $(DRIVER_O) $(SIMPLICICTI_O) $(MAIN_O)
 
@@ -55,6 +57,13 @@ CONFIG_FLAGS ?= $(shell cat config.h | grep CONFIG_FREQUENCY | sed 's/.define CO
 ifeq (debug,$(findstring debug,$(MAKECMDGOALS)))
 USE_CFLAGS = $(CFLAGS_DEBUG)
 endif
+
+HOST_CC_OPT = -DHOST_TESTS  $(CC_INCLUDE)
+HOST_SOURCE = logic/altitude_math.c driver/dsp.c sys.c
+HOST_O = $(addsuffix .host.o,$(basename $(HOST_SOURCE)))
+HOST_TESTS_SOURCE = $(wildcard logic/*_test.c)
+HOST_TESTS_O = $(addsuffix .host.o,$(basename $(HOST_TESTS_SOURCE)))
+HOST_TESTS = $(basename $(HOST_TESTS_SOURCE))
 
 main: build config.h even_in_range $(ALL_O) $(EXTRA_O) build
 	@echo $(findstring debug,$(MAKEFLAGS))
@@ -79,6 +88,11 @@ $(ALL_S): %.s: %.o config.h include/project.h
 	msp430-objdump -D $< > $@
 #             $(CC) -c $(CFLAGS) $< -o $@
 
+$(HOST_O) $(HOST_TESTS_O): %.host.o: %.c config.h include/project.h
+	$(HOST_CC) $(HOST_CC_OPT) $(CONFIG_FLAGS) -c $< -o $@
+
+$(HOST_TESTS): %: %.host.o $(HOST_O)
+	$(HOST_CC) $< $(HOST_O) -lm -o $@
 
 debug:	build even_in_range $(ALL_O)
 	@echo "Compiling $@ for $(CPU) in debug"
