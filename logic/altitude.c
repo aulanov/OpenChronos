@@ -139,32 +139,6 @@ void reset_altitude_measurement(void)
 	}
 }
 
-#if defined(CONFIG_ALTITUDE_UNIT_FEET) || defined(CONFIG_ALTITUDE_UNIT_SETTABLE)
-// *************************************************************************************************
-// @fn          conv_m_to_ft
-// @brief       Convert meters to feet
-// @param       u16 m		Meters
-// @return      u16		Feet
-// *************************************************************************************************
-s16 convert_m_to_ft(s16 m)
-{
-	return (((s32)328*m)/100);
-}
-
-
-// *************************************************************************************************
-// @fn          conv_ft_to_m
-// @brief       Convert feet to meters
-// @param       u16 ft		Feet
-// @return      u16		Meters
-// *************************************************************************************************
-s16 convert_ft_to_m(s16 ft)
-{
-	return (((s32)ft*61)/200);
-}
-
-#endif
-
 // *************************************************************************************************
 // @fn          is_altitude_measurement
 // @brief       Altitude measurement check
@@ -348,9 +322,6 @@ void mx_altitude(u8 line)
 		// Convert altitude in meters to feet
 		altitude = sAlt.altitude;
 
- 		// Convert from meters to feet
-		altitude = convert_m_to_ft(altitude);		
-
 		// Limits for set_value function
 		limit_low = -500;
 #ifdef CONFIG_ALTI_ACCUMULATOR
@@ -371,18 +342,6 @@ void mx_altitude(u8 line)
 		// Button STAR (short): save, then exit 
 		if (button.flag.star) 
 		{
-			// When using English units, convert ft back to m before updating pressure table
-#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
-			if (!sys.flag.use_metric_units)
-			{
-#endif
-#if defined(CONFIG_ALTITUDE_UNIT_SETTABLE) || defined(CONFIG_ALTITUDE_UNIT_FEET)
-				altitude = convert_ft_to_m((s16)altitude);
-#endif
-#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
-			}
-#endif
-
 			// Update pressure table
 			update_pressure_table((s16)altitude, sAlt.pressure, sAlt.temperature);
 			
@@ -405,6 +364,8 @@ void mx_altitude(u8 line)
 	button.all_flags = 0;
 }
 
+void display_altitude_meters(u8 update) {
+}
 
 // *************************************************************************************************
 // @fn          display_altitude
@@ -413,15 +374,8 @@ void mx_altitude(u8 line)
 //				u8 update		DISPLAY_LINE_UPDATE_FULL, DISPLAY_LINE_UPDATE_PARTIAL, DISPLAY_LINE_CLEAR
 // @return      none
 // *************************************************************************************************
-#ifdef CONFIG_ALTITUDE
 void display_altitude(u8 line, u8 update)
 {
-	u8 * str;
-#if defined(CONFIG_ALTITUDE_UNIT_SETTABLE) || defined(CONFIG_ALTITUDE_UNIT_FEET)
-	s16 ft;
-#endif
-	
-	// redraw whole screen
 	if (update == DISPLAY_LINE_UPDATE_FULL)	
 	{
 		// Enable pressure measurement
@@ -432,130 +386,52 @@ void display_altitude(u8 line, u8 update)
 #ifdef CONFIG_ALTI_ACCUMULATOR
 		display_chars(LCD_SEG_L1_3_0, (u8*)"ALT ", SEG_ON);
 #endif
-#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE	
-		if (sys.flag.use_metric_units)
-		{
-#endif
-#if defined(CONFIG_ALTITUDE_UNIT_SETTABLE) || defined(CONFIG_ALTITUDE_UNIT_METERS)
-			// Display "m" symbol
-			display_symbol(LCD_UNIT_L1_FT, SEG_OFF);
-			display_symbol(LCD_UNIT_L1_M, SEG_ON);
-#endif
+
+		u8 m, ft;
 #ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
+		if (sys.flag.use_metric_units) {
+		       m = SEG_ON; ft = SEG_OFF;
+		} else {
+		       m = SEG_OFF; ft = SEG_ON;
 		}
-		else
-		{
+#elif defined(CONFIG_ALTITUDE_UNIT_METERS)
+		m = SEG_ON; ft = SEG_OFF;
+#elif defined(CONFIG_ALTITUDE_UNIT_FEET)
+		m = SEG_OFF; ft = SEG_ON;
 #endif
-#if defined(CONFIG_ALTITUDE_UNIT_SETTABLE) || defined(CONFIG_ALTITUDE_UNIT_FEET)
-			// Display "ft" symbol
-			display_symbol(LCD_UNIT_L1_M, SEG_OFF);
-			display_symbol(LCD_UNIT_L1_FT, SEG_ON);
-#endif
-#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
-		}
-#endif		
-		// Display altitude
-		display_altitude(LINE1, DISPLAY_LINE_UPDATE_PARTIAL);
+	       // Display "m" or "ft" symbol
+	       display_symbol(LCD_UNIT_L1_M, m);
+	       display_symbol(LCD_UNIT_L1_FT, ft);
 	}
-	else if (update == DISPLAY_LINE_UPDATE_PARTIAL)
-	{
+	if (update == DISPLAY_LINE_UPDATE_FULL || update == DISPLAY_LINE_UPDATE_PARTIAL) {
 		// Update display only while measurement is active
-		if (sAlt.timeout > 0)
-		{
-#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
-			if (sys.flag.use_metric_units)
-			{
-#endif
-#if defined(CONFIG_ALTITUDE_UNIT_SETTABLE) || defined(CONFIG_ALTITUDE_UNIT_METERS)
-				// Display altitude in xxxx m format, allow 3 leading blank digits
-				if (sAlt.altitude >= 0)
-				{
+		if (sAlt.timeout > 0) {
 #ifdef CONFIG_ALTI_ACCUMULATOR
-					str = _itoa(sAlt.altitude, 5, 4);
+			u8 digits=5, blanks=4;
 #else
-					str = _itoa(sAlt.altitude, 4, 3);
+			u8 digits=4, blanks=3;
 #endif
-					display_symbol(LCD_SYMB_ARROW_UP, SEG_ON);
-					display_symbol(LCD_SYMB_ARROW_DOWN, SEG_OFF);
-				}
-				else
-				{
-#ifdef CONFIG_ALTI_ACCUMULATOR
-<<<<<<< HEAD
-					str = _itoa(sAlt.altitude*(-1), 4, 3);
-#else
-					str = _itoa(sAlt.altitude*(-1), 5, 4);
-=======
-					str = itoa(sAlt.altitude*(-1), 5, 4);
-#else
-					str = itoa(sAlt.altitude*(-1), 4, 3);
->>>>>>> 7dcf822... Fix altitude readings for non-positive metres (was chopping off a digit)
-#endif
-					display_symbol(LCD_SYMB_ARROW_UP, SEG_OFF);
-					display_symbol(LCD_SYMB_ARROW_DOWN, SEG_ON);
-				}
-#endif
-#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
+			u8 *str;
+			// Display altitude in xxxx m format, allow 3 leading blank digits
+			if (sAlt.altitude >= 0) {
+				str = _itoa(sAlt.altitude, digits, blanks);
+				display_symbol(LCD_SYMB_ARROW_UP, SEG_ON);
+				display_symbol(LCD_SYMB_ARROW_DOWN, SEG_OFF);
+			} else {
+				str = _itoa(-sAlt.altitude, digits, blanks);
+				display_symbol(LCD_SYMB_ARROW_UP, SEG_OFF);
+				display_symbol(LCD_SYMB_ARROW_DOWN, SEG_ON);
 			}
-			else
-			{
-#endif
-#if defined(CONFIG_ALTITUDE_UNIT_SETTABLE) || defined(CONFIG_ALTITUDE_UNIT_FEET)
-				// Convert from meters to feet
-				ft = convert_m_to_ft(sAlt.altitude);
+
 #ifdef CONFIG_ALTI_ACCUMULATOR
-				// Limit to 9999ft (3047m)
-				if (ft > 9999) ft = 9999;
-#endif
-				// Display altitude in xxxx ft format, allow 3 leading blank digits
-				if (ft >= 0)
-				{
-#ifdef CONFIG_ALTI_ACCUMULATOR
-<<<<<<< HEAD
-					str = _itoa(ft, 4, 3);
-#else
-					str = _itoa(ft, 5, 4);
-=======
-					str = itoa(ft, 5, 4);
-#else
-					str = itoa(ft, 4, 3);
->>>>>>> 7dcf822... Fix altitude readings for non-positive metres (was chopping off a digit)
-#endif
-					display_symbol(LCD_SYMB_ARROW_UP, SEG_ON);
-					display_symbol(LCD_SYMB_ARROW_DOWN, SEG_OFF);
-				}
-				else
-				{
-<<<<<<< HEAD
-#ifdef CONFIG_ALTI_ACCUMULATOR
-					str = _itoa(ft*(-1), 4, 3);
-#else
-					str = _itoa(ft*(-1), 5, 4);
-=======
-#ifndef CONFIG_ALTI_ACCUMULATOR
-					str = itoa(ft*(-1), 5, 4);
-#else
-					str = itoa(ft*(-1), 4, 3);
->>>>>>> 7dcf822... Fix altitude readings for non-positive metres (was chopping off a digit)
-#endif
-					display_symbol(LCD_SYMB_ARROW_UP, SEG_OFF);
-					display_symbol(LCD_SYMB_ARROW_DOWN, SEG_ON);
-				}				
-#endif
-#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
-			}
-#endif
-#ifdef CONFIG_ALTI_ACCUMULATOR
-			// display altitude on bottom line (5 digits)
+			// Display altitude on bottom line (5 digits)
 			clear_line(LINE2);
 			display_chars(LCD_SEG_L2_4_0, str, SEG_ON);
 #else
 			display_chars(LCD_SEG_L1_3_0, str, SEG_ON);
 #endif
 		}
-	}
-	else if (update == DISPLAY_LINE_CLEAR)
-	{
+	} else if (update == DISPLAY_LINE_CLEAR) {
 		// Disable pressure measurement
 		sAlt.state = MENU_ITEM_NOT_VISIBLE;
 
@@ -913,7 +789,5 @@ void mx_alt_accumulator(u8 line)
 
 
 #endif // CONFIG_ALTI_ACCUMULATOR
-
-#endif // CONFIG_ALTITUDE
 
 #endif // FEATURE_ALTITUDE
