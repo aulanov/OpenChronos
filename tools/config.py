@@ -145,25 +145,30 @@ DATA["CONFIG_ALTITUDE"] = {
 
 DATA["CONFIG_ALTITUDE_UNIT_METERS"] = {
         "name": "  Always show altitude in metres (-342 bytes)",
-        "depends": [],
+        "depends": ["CONFIG_ALTITUDE"],
         "default": False,
         "help": "Overrides any global unit setting"}
 
 DATA["CONFIG_ALTITUDE_UNIT_FEET"] = {
         "name": "  Always show altitude in feet (-176 bytes)",
-        "depends": [],
+        "depends": ["CONFIG_ALTITUDE"],
         "default": False,
         "help": "Overrides any global unit setting/metric only mode"}
 
+DATA["CONFIG_ALTITUDE_NO_FILTER"] = {
+	"name": "  Disable altitude measurment filter",
+	"depends": ["CONFIG_ALTITUDE"],
+	"default": False}
+
 DATA["CONFIG_VARIO"] = {
         "name": "  Vertical speed indicator (478 bytes)",
-        "depends": [],
+        "depends": ["CONFIG_ALTITUDE"],
         "default": False,
         "help": "Must have altimeter enabled and active to function"}
 
 DATA["CONFIG_ALTI_ACCUMULATOR"] = {
 	"name": "  Altitude accumulator (1068 bytes)",
-	"depends": [],
+	"depends": ["CONFIG_ALTITUDE"],
 	"default": False,
 	"help": "If active take altitude measurement once per minute and accumulate all ascending vertical meters."
 	}
@@ -256,12 +261,6 @@ DATA["CONFIG_USEPPT"] = {
 ###IMPLEMENTED by Dobfek, 2011-08-25 
 DATA["USE_PRESS"] = {
 	"name": "Use pressbutton backlight instead of 3 sec",
-	"depends": [],
-	"default": False}
-	
-###IMPLEMENTED Dobfek, from Wami 03.2011
-DATA["DONT_USE_FILTER"] = {
-	"name": "Don't use altitude measurment filter",
 	"depends": [],
 	"default": False}
 	
