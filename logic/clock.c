@@ -228,6 +228,13 @@ void display_selection_Timeformat1(u8 segments, u32 index, u8 digits, u8 blanks,
 // *************************************************************************************************
 void mx_time(u8 line)
 {
+#ifdef CONFIG_USE_SYNC_TOSET_TIME
+
+  if (sys.flag.low_battery) return;
+  display_sync(LINE2, DISPLAY_LINE_UPDATE_FULL);
+  start_simpliciti_sync();
+
+#else
   u8 select;
   s32 timeformat;
   s16 timeformat1;
@@ -239,13 +246,6 @@ void mx_time(u8 line)
   // Clear display
   clear_display_all();
 
-#ifdef CONFIG_USE_SYNC_TOSET_TIME
-
-  if (sys.flag.low_battery) return;
-  display_sync(LINE2, DISPLAY_LINE_UPDATE_FULL);
-  start_simpliciti_sync();
-
-#else
   // Convert global time to local variables
   // Global time keeps on ticking in background until it is overwritten
   if (sys.flag.am_pm_time)

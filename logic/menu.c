@@ -54,6 +54,7 @@
 #include "stopwatch.h"
 #include "temperature.h"
 #include "altitude.h"
+#include "altitude_accumulator.h"
 #include "battery.h"
 //pfs
 #ifndef ELIMINATE_BLUEROBIN

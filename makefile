@@ -22,7 +22,7 @@ CC_INCLUDE = -I$(PROJ_DIR)/ -I$(PROJ_DIR)/include/ -I$(PROJ_DIR)/driver/ -I$(PRO
 
 CC_COPT		=  $(CC_CMACH) $(CC_DMACH) $(CC_DOPT)  $(CC_INCLUDE) 
 
-LOGIC_SOURCE = logic/acceleration.c logic/alarm.c logic/altitude.c logic/altitude_math.c logic/battery.c  logic/clock.c logic/date.c logic/menu.c logic/rfbsl.c logic/rfsimpliciti.c logic/stopwatch.c logic/temperature.c logic/test.c logic/user.c logic/phase_clock.c logic/eggtimer.c logic/prout.c logic/vario.c logic/sidereal.c logic/strength.c \
+LOGIC_SOURCE = logic/acceleration.c logic/alarm.c logic/altitude.c logic/altitude_accumulator.c logic/altitude_math.c logic/battery.c  logic/clock.c logic/date.c logic/menu.c logic/rfbsl.c logic/rfsimpliciti.c logic/stopwatch.c logic/temperature.c logic/test.c logic/user.c logic/phase_clock.c logic/eggtimer.c logic/prout.c logic/vario.c logic/sidereal.c logic/strength.c \
 				logic/sequence.c logic/gps.c logic/dst.c logic/otp.c
 
 LOGIC_O = $(addsuffix .o,$(basename $(LOGIC_SOURCE)))

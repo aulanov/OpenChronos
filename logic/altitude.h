@@ -36,11 +36,6 @@
 #ifndef ALTITUDE_H_
 #define ALTITUDE_H_
 
-
-// *************************************************************************************************
-// Include section
-
-
 // *************************************************************************************************
 // Prototypes section
 extern void reset_altitude_measurement(void);
@@ -49,21 +44,14 @@ extern void start_altitude_measurement(void);
 extern void stop_altitude_measurement(void);
 extern void do_altitude_measurement(u8 filter);
 
-// menu functions
+// Menu functions
 extern void sx_altitude(u8 line);
 extern void mx_altitude(u8 line);
 extern void display_altitude(u8 line, u8 update);
 
-
-// *************************************************************************************************
-// Defines section
-
 // Stop altitude measurement after 60 minutes to save battery
 #define ALTITUDE_MEASUREMENT_TIMEOUT	(60*60u)
 
-
-// *************************************************************************************************
-// Global Variable section
 struct alt
 {
 	// MENU_ITEM_NOT_VISIBLE, MENU_ITEM_VISIBLE   
@@ -86,10 +74,5 @@ struct alt
 	
 };
 extern struct alt sAlt;
-
-
-// *************************************************************************************************
-// Extern section
-
 
 #endif /*ALTITUDE_H_*/
