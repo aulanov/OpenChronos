@@ -904,9 +904,6 @@ void read_calibration_values(void)
 		simpliciti_ed_address[1] = sMyROMAddress.addr[1];
 		simpliciti_ed_address[2] = sMyROMAddress.addr[2];
 		simpliciti_ed_address[3] = sMyROMAddress.addr[3];
-#ifdef CONFIG_ALTITUDE
-		sAlt.altitude_offset	 = 0;
-#endif
 	}
 	else
 	{
@@ -926,16 +923,6 @@ void read_calibration_values(void)
 		simpliciti_ed_address[2] = cal_data[8];
 		simpliciti_ed_address[3] = cal_data[9];
 		// S/W version byte set during calibration?
-#ifdef CONFIG_ALTITUDE
-		if (cal_data[12] != 0xFF)
-		{
-			sAlt.altitude_offset = (s16)((cal_data[10] << 8) + cal_data[11]);;
-		}
-		else
-		{
-			sAlt.altitude_offset = 0;	
-		}
-#endif
 	}
 }
 

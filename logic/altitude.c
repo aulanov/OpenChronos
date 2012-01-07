@@ -111,13 +111,6 @@ void reset_altitude_measurement(void)
 		// Do single conversion
 		start_altitude_measurement();
 		stop_altitude_measurement();	
-
-		// Apply calibration offset and recalculate pressure table
-		if (sAlt.altitude_offset != 0)
-		{
-			sAlt.altitude += sAlt.altitude_offset;
-			update_pressure_table(sAlt.altitude, sAlt.pressure);
-		}
 	}
 }
 

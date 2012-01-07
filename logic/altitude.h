@@ -62,13 +62,7 @@ struct alt
 
 	// Temperature (°K)
 	u16		temperature;
-
-	// Altitude (m)
 	s16		altitude;
-	
-	// Altitude offset stored during calibration
-	s16		altitude_offset;
-
 	// Timeout
 	u16		timeout;
 	
