@@ -155,6 +155,14 @@ DATA["CONFIG_ALTITUDE_UNIT_FEET"] = {
         "default": False,
         "help": "Overrides any global unit setting/metric only mode"}
 
+DATA["CONFIG_ALTITUDE_SKYDIVING"] = {
+        "name": "Skydiving mode for the altimeter",
+        "depends": ["CONFIG_ALTITUDE"],
+        "default": False,
+        "help": "Skydiving altimeter includes several tweaks to make the altimeter \n"
+	        "appropriate for skydiving."
+        }
+
 DATA["CONFIG_ALTITUDE_NO_FILTER"] = {
 	"name": "  Disable altitude measurment filter",
 	"depends": ["CONFIG_ALTITUDE"],

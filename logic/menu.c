@@ -226,7 +226,7 @@ const struct menu menu_L1_Altitude =
 {
 	FUNCTION(sx_altitude),				// direct function
 	FUNCTION(mx_altitude),				// sub menu function
-	FUNCTION(menu_skip_next),			// next item function
+	FUNCTION(nx_altitude),				// next item function
 	FUNCTION(display_altitude),			// display function
 	FUNCTION(update_time),				// new display data
 };

@@ -36,8 +36,6 @@
 #ifndef ALTITUDE_H_
 #define ALTITUDE_H_
 
-// *************************************************************************************************
-// Prototypes section
 extern void reset_altitude_measurement(void);
 extern u8 is_altitude_measurement(void);
 extern void start_altitude_measurement(void);
@@ -47,24 +45,30 @@ extern void do_altitude_measurement(u8 filter);
 // Menu functions
 extern void sx_altitude(u8 line);
 extern void mx_altitude(u8 line);
+extern void nx_altitude(u8 line);
 extern void display_altitude(u8 line, u8 update);
 
 // Stop altitude measurement after 60 minutes to save battery
 #define ALTITUDE_MEASUREMENT_TIMEOUT	(60*60u)
 
+typedef enum {
+	ALTITUDE_REGULAR,
+	ALTITUDE_SKYDIVING,
+	ALTITUDE_LAST_MODE,
+} altitude_mode_t;
+
 struct alt
 {
 	// MENU_ITEM_NOT_VISIBLE, MENU_ITEM_VISIBLE   
-	menu_t	state; 
-
+	menu_t state; 
+	altitude_mode_t mode;
 	// Pressure (Pa)
-	u32		pressure;
-
+	u32 pressure;
 	// Temperature (°K)
-	u16		temperature;
-	s16		altitude;
+	u16 temperature;
+	s16 altitude;
 	// Timeout
-	u16		timeout;
+	u16 timeout;
 	
 };
 extern struct alt sAlt;
