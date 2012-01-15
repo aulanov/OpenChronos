@@ -283,22 +283,22 @@ void mx_altitude(u8 line)
 	s32 limit_high = 9000, limit_low = -500;
 	u8 units_symbol;
 
-	// Clear display
-	clear_display_all();
-
-#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
-	display_symbol(sys.flag.use_metric_units ? LCD_UNIT_L1_M : LCD_UNIT_L1_M, SEG_ON);
-#elif defined(CONFIG_ALTITUDE_UNIT_METERS)
-	display_symbol(LCD_UNIT_L1_M, SEG_ON);
-#elif defined(CONFIG_ALTITUDE_UNIT_FEET)
-	display_symbol(LCD_UNIT_L1_FT, SEG_ON);
-#endif
-
 	if (sAlt.mode == ALTITUDE_SKYDIVING) {
 		sAlt.altitude = 0;
 		update_pressure_table(0, sAlt.pressure);
 		display.flag.line1_full_update = 1;
 	} else {
+		// Clear display
+		clear_display_all();
+
+#ifdef CONFIG_ALTITUDE_UNIT_SETTABLE
+		display_symbol(sys.flag.use_metric_units ? LCD_UNIT_L1_M : LCD_UNIT_L1_FT, SEG_ON);
+#elif defined(CONFIG_ALTITUDE_UNIT_METERS)
+		display_symbol(LCD_UNIT_L1_M, SEG_ON);
+#elif defined(CONFIG_ALTITUDE_UNIT_FEET)
+		display_symbol(LCD_UNIT_L1_FT, SEG_ON);
+#endif
+
 		// Loop values until all are set or user breaks	set
 		while(1)
 		{
@@ -317,6 +317,8 @@ void mx_altitude(u8 line)
 			set_value(&altitude, 4, 3, limit_low, limit_high,
 				  SETVALUE_DISPLAY_VALUE + SETVALUE_FAST_MODE + SETVALUE_DISPLAY_ARROWS, LCD_SEG_L1_3_0, display_value1);
 		}
+
+		display_symbol(LCD_SYMB_ARROW_UP, SEG_OFF);
 	}
 
 	// Clear button flags
@@ -362,7 +364,6 @@ void display_altitude(u8 line, u8 update)
 	       // Display "m" or "ft" symbol
 	       display_symbol(LCD_UNIT_L1_M, m);
 	       display_symbol(LCD_UNIT_L1_FT, ft);
-	       display_symbol(LCD_SYMB_ARROW_UP, SEG_OFF);
 	}
 	if (update == DISPLAY_LINE_UPDATE_FULL || update == DISPLAY_LINE_UPDATE_PARTIAL) {
 		// Update display only while measurement is active
@@ -372,16 +373,16 @@ void display_altitude(u8 line, u8 update)
 				u16 altitude = (sAlt.altitude + 50) / 100;
 				str = _itoa(altitude, 3, 1);
 				display_chars(LCD_SEG_L1_3_1, str, SEG_ON);
+				display_chars(LCD_SEG_L1_0, NULL, SEG_OFF);
 				display_symbol(LCD_SEG_L1_DP1, SEG_ON);
+				display_symbol(LCD_SYMB_ARROW_DOWN, SEG_OFF);
 			} else {
 				// Display altitude in xxxx m format, allow 3 leading blank digits
 				if (sAlt.altitude >= 0) {
 					str = _itoa(sAlt.altitude, 4, 3);
-					display_symbol(LCD_SYMB_ARROW_UP, SEG_ON);
 					display_symbol(LCD_SYMB_ARROW_DOWN, SEG_OFF);
 				} else {
 					str = _itoa(-sAlt.altitude, 4, 3);
-					display_symbol(LCD_SYMB_ARROW_UP, SEG_OFF);
 					display_symbol(LCD_SYMB_ARROW_DOWN, SEG_ON);
 				}
 
@@ -399,7 +400,6 @@ void display_altitude(u8 line, u8 update)
 		// Clean up function-specific segments before leaving function
 		display_symbol(LCD_UNIT_L1_M, SEG_OFF);
 		display_symbol(LCD_UNIT_L1_FT, SEG_OFF);
-		display_symbol(LCD_SYMB_ARROW_UP, SEG_OFF);
 		display_symbol(LCD_SYMB_ARROW_DOWN, SEG_OFF);
 		display_symbol(LCD_SEG_L1_DP1, SEG_OFF);
 	}
